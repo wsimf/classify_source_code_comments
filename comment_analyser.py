@@ -2,32 +2,11 @@ import os
 import colorama
 import javalang
 import pandas as pd
-import data_cleaning
-
-from nltk import word_tokenize
-from nltk.stem import PorterStemmer
-from nltk.corpus import stopwords
+from data_cleaning import DataCleaner
+from code_meta_data import SourceCodeMetadata
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.cluster import KMeans
 from sklearn.metrics import adjusted_rand_score
-
-
-class SourceCodeMetadata:
-
-    def __init__(self, comment, method=None, params=None, return_value=None):
-        self.comment = comment
-        self.method = method
-        self.params = params
-        self.return_value = return_value
-        self.is_multiline = False
-
-    def append_comment(self, string):
-        if len(self.comment) == 0 or self.comment.isspace():
-            self.comment = string
-        else:
-            seq = (self.comment, string)
-            self.comment = " ".join(seq)
-            self.is_multiline = True
 
 
 class FileInspector:
@@ -130,6 +109,8 @@ class FileInspector:
 def main():
     colorama.init()
     inspector = FileInspector("/Users/Sudara/Offline/source-code-analyser-resources")
+    data_cleaning = DataCleaner()
+
     file_list = inspector.get_all_files()
     comments_data = inspector.get_comments(file_list)
     comments = {}
@@ -137,24 +118,9 @@ def main():
     for key, value in comments_data.items():
         print(colorama.Fore.GREEN + "[FILE] : " + key)
         for item in value:
-            print(colorama.Fore.YELLOW + "      [COMMENT] : " + item.comment + "\n")
+            item.print_comment()
             comments["tokenized"] = data_cleaning.clean_document(item)
 
-    words = data_cleaning.clean_document()
-    vectorizer = TfidfVectorizer(stop_words='english')
-    X = vectorizer.fit_transform(comments)
 
-    true_k = 2
-    model = KMeans(n_clusters=true_k, init='k-means++', max_iter=100, n_init=1)
-    model.fit(X)
-
-    print("Top terms per cluster:")
-    order_centroids = model.cluster_centers_.argsort()[:, ::-1]
-    terms = vectorizer.get_feature_names()
-    for i in range(true_k):
-        print("Cluster %d:" % i)
-        for ind in order_centroids[i, :10]:
-            print(' %s' % terms[ind])
-
-
-if __name__ == '__main__': main()
+if __name__ == '__main__':
+    main()
