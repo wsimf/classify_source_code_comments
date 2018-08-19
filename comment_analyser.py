@@ -2,6 +2,7 @@ import os
 import colorama
 import javalang
 import pandas as pd
+import data_cleaning
 
 from nltk import word_tokenize
 from nltk.stem import PorterStemmer
@@ -110,18 +111,18 @@ class FileInspector:
             print("Found {} comments in file {}".format(len(comments_in_file), item))
             file.close()
 
-            tree = javalang.parse.parse(file_text)  # parse into a java source code file
-
-            count = 0
-            for path, node in tree:
-                print('path: {}'.format(path))
-                if hasattr(node, 'documentation'):
-                    if hasattr(node, 'name'):
-                        print('name: {}'.format(node.name))
-                    print('documentation: {}'.format(node.documentation))
-                    count += 1
-                    print(" ")
-            print(count)
+            # tree = javalang.parse.parse(file_text)  # parse into a java source code file
+            #
+            # count = 0
+            # for path, node in tree:
+            #     print('path: {}'.format(path))
+            #     if hasattr(node, 'documentation'):
+            #         if hasattr(node, 'name'):
+            #             print('name: {}'.format(node.name))
+            #         print('documentation: {}'.format(node.documentation))
+            #         count += 1
+            #         print(" ")
+            # print(count)
 
         return pd.Series(comments_data)
 
@@ -130,11 +131,30 @@ def main():
     colorama.init()
     inspector = FileInspector("/Users/Sudara/Offline/source-code-analyser-resources")
     file_list = inspector.get_all_files()
-    comments = inspector.get_comments(file_list)
-    for key, value in comments.items():
+    comments_data = inspector.get_comments(file_list)
+    comments = {}
+
+    for key, value in comments_data.items():
         print(colorama.Fore.GREEN + "[FILE] : " + key)
         for item in value:
             print(colorama.Fore.YELLOW + "      [COMMENT] : " + item.comment + "\n")
+            comments["tokenized"] = data_cleaning.clean_document(item)
+
+    words = data_cleaning.clean_document()
+    vectorizer = TfidfVectorizer(stop_words='english')
+    X = vectorizer.fit_transform(comments)
+
+    true_k = 2
+    model = KMeans(n_clusters=true_k, init='k-means++', max_iter=100, n_init=1)
+    model.fit(X)
+
+    print("Top terms per cluster:")
+    order_centroids = model.cluster_centers_.argsort()[:, ::-1]
+    terms = vectorizer.get_feature_names()
+    for i in range(true_k):
+        print("Cluster %d:" % i)
+        for ind in order_centroids[i, :10]:
+            print(' %s' % terms[ind])
 
 
 if __name__ == '__main__': main()
