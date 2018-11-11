@@ -1,42 +1,63 @@
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
-from nltk.stem import PorterStemmer
+from nltk.stem.snowball import EnglishStemmer
+import nltk
 import string
+import re
+
+nltk.download('stopwords')
+ps = EnglishStemmer()
+
+
+def data_tokenize_clean(text):
+    text = text.translate(str.maketrans('', '', string.punctuation))  # remove punctuations
+    tokens = word_tokenize(text)  # tokenize the comment
+    filtered = set()
+
+    for word in tokens:
+        word = ps.stem(word)
+        word = word.lower()
+
+        filtered.add(word)
+
+    return filtered
 
 
 class DataCleaner:
 
     def __init__(self):
+        nltk.download('stopwords')
         self.stop_words = set(stopwords.words('english'))
-        self.ps = PorterStemmer()
+        self.ps = EnglishStemmer()
 
-    def remove_stop_words(self, word_list):
-        filtered = []
+    @staticmethod
+    def check_is_url(word):
+        url = re.findall(r'http?://\S+', word)
+        for text in url:
+            word.strip(text)
 
-        for word in word_list:
-            if word not in self.stop_words:
-                filtered.append(word)
-
-        return filtered
-
-    def string_stemming(self, word_list):
-        filtered = set()
-
-        for word in word_list:
-            filtered.add(self.ps.stem(word))
-
-        return filtered
+        return word
 
     def clean_document(self, document):
-        document = document.translate(None, string.punctuation)  # remove punctuations
+        document = document.translate(str.maketrans('', '', string.punctuation))  # remove punctuations
         tokenize = word_tokenize(document)  # tokenize the comment
-        no_stop_words = self.remove_stop_words(tokenize)
-        cleaned = self.string_stemming(no_stop_words)
+        filtered = set()
 
-        for index, word in enumerate(cleaned):
-            word = word.lower()  # convert to lower case
+        for word in tokenize:
+            if word not in self.stop_words and 3 < len(word) < 20:
+                word = DataCleaner.check_is_url(word)
+                word = self.ps.stem(word)
+                word = word.lower()
 
-            cleaned[index] = word
+                filtered.add(word)
 
-        return cleaned
+        return filtered
 
+    @staticmethod
+    def check_if_copyright(comment):
+        copyright_words = ["Copyright", "Apache License"]
+        for word in copyright_words:
+            if word in comment:
+                return True
+
+        return False
