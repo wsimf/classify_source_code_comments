@@ -14,7 +14,7 @@
  - python-dateutil
 
 ### Preparing Environment
-- Unzip the project folder to a convenient location
+- Unzip or clone (```git clone https://github.com/wsimf/classify_source_code_comments.git```) the project to a convenient location
 - Open the command prompt / terminal and navigate to the project folder
 - Make sure Python3 is installed (```python -V```)
 - Install pythonw (if you are using [anaconda] for python environment management, you can use ```conda install python.app``` on a macOS environment)
