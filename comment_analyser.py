@@ -53,7 +53,7 @@ def main():
 
     print("TF-IDF Vectorizer size : ", len(tfidf_v.toarray()))
 
-    db = DBSCAN(eps=0.9, min_samples=3).fit(tfidf_v)
+    db = DBSCAN(eps=0.7, min_samples=3).fit(tfidf_v)
     core_samples_mask = np.zeros_like(db.labels_, dtype=bool)
     core_samples_mask[db.core_sample_indices_] = True
     labels = db.labels_
@@ -81,7 +81,7 @@ def main():
         cluster_file.write("** [CLUSTER] : {} \n".format(index))
         for comment in data:
             cluster_file.write("      [COMMENT] : " + comment + "\n")
-            # print(colorama.Fore.GREEN + comment + "\n")
+            print(colorama.Fore.GREEN + comment + "\n")
 
         print("TOTAL : ", len(data))
         print(colorama.Fore.YELLOW + "** END **\n")
