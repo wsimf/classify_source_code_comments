@@ -3239,4 +3239,3 @@
       [COMMENT] : Starts running the graph. Will open the filters in the graph if they are not already open.
       [COMMENT] : Closes the filters in a graph. Can only be called if the graph is not running.
       [COMMENT] : Sets the graph to be run. Will call prepare() on graph. Cannot be called when a graph is already running. / 
-

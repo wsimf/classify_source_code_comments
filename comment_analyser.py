@@ -3,6 +3,7 @@ import os
 import data_cleaning
 import numpy as np
 import matplotlib.pyplot as plt
+from data_cleaning import DataCleaner
 from sklearn.cluster import DBSCAN
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.feature_extraction.text import CountVectorizer
@@ -26,7 +27,7 @@ def main():
         for item in value:
             if item.comment not in comments:
                 if len(item.comment.split()) > 10:
-                    if not data_cleaning.DataCleaner.check_if_copyright(item.comment):
+                    if not DataCleaner.check_if_copyright(item.comment):
                         print(colorama.Fore.YELLOW + "      [COMMENT] : " + item.comment + "\n")
                         comments_file.write("      [COMMENT] : " + item.comment + "\n")
                         comments.append(item.comment)
@@ -106,27 +107,6 @@ def main():
     plt.title("TF-IDF Vectorizer")
 
     plt.show()
-
-    # unique_labels = set(labels)
-    # colors = [plt.cm.Spectral(each)
-    #           for each in np.linspace(0, 1, len(unique_labels))]
-    # for k, col in zip(unique_labels, colors):
-    #     if k == -1:
-    #         # Black used for noise.
-    #         col = [0, 0, 0, 1]
-    #
-    #     class_member_mask = (labels == k)
-    #
-    #     xy = tfidf_v[class_member_mask & core_samples_mask]
-    #     plt.plot(xy[:, 0], xy[:, 1], 'o', markerfacecolor=tuple(col),
-    #              markeredgecolor='k', markersize=14)
-    #
-    #     xy = tfidf_v[class_member_mask & ~core_samples_mask]
-    #     plt.plot(xy[:, 0], xy[:, 1], 'o', markerfacecolor=tuple(col),
-    #              markeredgecolor='k', markersize=6)
-    #
-    # plt.title('Estimated number of clusters: %d' % n_clusters_)
-    # plt.show()
 
 
 if __name__ == '__main__':

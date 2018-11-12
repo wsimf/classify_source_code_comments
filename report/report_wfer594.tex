@@ -27,11 +27,11 @@ wfer594@aucklanduni.ac.nz}
 \maketitle
 
 \begin{abstract}
-Text clustering and classification techniques are used in characterising text documents into one or more categories based on various factors. This study focuses on classifying source code comments into a set of categories by utilising several natural language processing techniques such as TF-IDF vectorising, stop words elimination and frequency distribution count of "Part of Speech" tags. Furthermore, the comments to perform classification are also collected by implementing a source code scanner for Java.
+Text clustering and classification techniques are used in characterising text documents into one or more categories based on various factors. This study focuses on classifying source code comments into a set of categories by utilising several natural language processing techniques such as TF-IDF vectorising, stop words elimination and frequency distribution count of token in the text document. Furthermore, the comments to perform classification are also collected by implementing a source code scanner for Java.
 \end{abstract}
 
 \begin{IEEEkeywords}
-text cliassification, comment, tf-idf vectorising
+text classification, comments, tf-idf vectorising, dbscan, k-means
 \end{IEEEkeywords}
 
 \section{Introduction}
@@ -75,7 +75,9 @@ The frequent terms in text clustering is a common factor analysed by several alg
 
 FTSC improves the efficiency of clustering by choosing a set of frequent terms based on its appearance frequency as the candidate set without immediate clustering of the documents with high dimensions. Mining of the frequent terms is a two-step process where all the frequent items found in the text are filtered according to a predetermined threshold (internally known as \textit{min\_sup}) \cite{1527337}. Then the general association rules are obtained for each filtered item set adhering to the rules defined in the Apriori algorithm. Each frequent term in frequent term set \textit{\{F\}} forms a clustering category where each category \textit{\{f\textsubscript{i}\}} has the least mutual overlap \cite{1527337}. It shows that there is no much difference in the clustering results obtained from FTSC and K-Means algorithms according to the quantitative analysis conducted by the authors using F-Measure on two datasets (namely \textit{NTCIR-3} and \textit{Reuters-21578}). However, due to the nature of the frequent term selection algorithm used in mining the datasets, FTSC is more optimised for text documents with longer and larger text data \cite{1527337}.
 
-Density-based spatial clustering of applications with noise (DBSCAN) is a data clustering algorithm which is heavily adopted for text clustering. It requires two main parameters; a point neighbourhood and the minimum number of points (\textit{min\_pts}) in the neighbourhood. The cohesion of the result depends on this minimum point value \cite{5659055}. The algorithm starts at an arbitrary position and if \textit{min\_pts} $\leq$ number of points in the initial position, then a cluster is formed. Otherwise, the point will be marked as noise and will select another point to repeat the process. DBSCAN produces clusters of arbitrary shape and is more sensitive for datasets with noise. 
+Density-based spatial clustering of applications with noise (DBSCAN) is a data clustering algorithm which is heavily adopted for text clustering. It requires two main parameters; a point neighbourhood and the minimum number of points (\textit{min\_sample}) in the neighbourhood. The cohesion of the result depends on this minimum point value \cite{5659055}. The algorithm starts at an arbitrary position and if \textit{min\_sample} $\leq$ number of points in the initial position, then a cluster is formed. Otherwise, the point will be marked as noise and will select another point to repeat the process. DBSCAN produces clusters of arbitrary shape and is more sensitive for datasets with noise. 
+
+The selection of the \textit{min\_sample} and the minimum neighbourhood value (\textit{eps}) depends on the dataset used. Setting the \textit{min\_sample} to 1 does not make any sense since every document in the corpus will then be considered as a cluster by itself. It is usually recommended to set this value to a minimum 3. But it may be possible to set a generous amount for a bigger dataset or datasets with more noise and duplicates.  The eps value affects the number of clusters produced in the result (discussed in \textsc{Section V}). If the chosen amount is too small, a large part of the data will be discarded as noise. If it is too big, then the clusters will merge affecting the accuracy of the outcome.
 
 \section{Dataset preparation}
 
@@ -102,12 +104,8 @@ Multi-line & /* & */
 
 The collected comment data is then stored in a Python dictionary along with a reference to the file. 
 
-\begin{figure}[!h]
-\centerline{\includegraphics[width=5cm, height=4.5cm]{graphics/java-program.png}}
-\label{fig}
-\end{figure}
-\begin{figure}[!h]
-\centerline{\includegraphics[width=6cm, height=4.25cm]{graphics/comment-result.png}}
+\begin{figure}
+\centerline{\includegraphics[width=6cm, height=9cm]{graphics/java-program_combined.png}}
 \caption{Comment scanning example}
 \label{fig}
 \end{figure}
@@ -138,7 +136,7 @@ The raw corpus data cannot be fed directly into most of the algorithms for analy
 
 \subsection{Count vectors}
 
-The count vector represents the data set as a matrix notation. In the matrix, a column is represented by a word or a term in the corpus and a row is represented by an individual document in the corpus. By examining each cell, we can identify the frequency count of a given word in the given text document.
+The count vector represents the frequency of a token occurrence in the given document. It is internally depicted as a matrix notation. In the matrix, a column is represented by a word or a term in the corpus and a row is represented by an individual document in the corpus. By examining each cell, we can identify the frequency count of a given word in the given text document.
 
 \begin{figure}[!h]
 \centerline{\includegraphics[width=5.75cm, height=3cm]{graphics/pic-1.png}}
@@ -297,7 +295,17 @@ The attached Appendix B lists examples of the clusters formed with the \textit{e
 
 \subsection{Threats to validity}
 
-As described in Section V, the clustering performance and accuracy is improved with a bigger corpus size. The more data the algorithm has access to, better the results are. However, text classification seemed a very resource intensive task which requires decent computing power. The algorithm was tested with a comment set of around 20,000 comments obtained from the Android Open Source Project, Firebase Admin API and Apache Hadoop Project. A typical computer with Dual-Core i5 processor and 8GB of RAM takes around 1 hour to process the given 20,000 comments. Using a variety of projects with a lot more comment data would produce a better-unbiased results set.
+As described in \textsc{Section V}, the clustering performance and accuracy is improved with a bigger corpus size. The more data the algorithm has access to, better the results are. However, text classification seemed a very resource intensive task which requires decent computing power. The algorithm was tested with a comment set of around 20,000 comments obtained from the Android Open Source Project, Firebase Admin API and Apache Hadoop Project. A typical computer with Dual-Core i5 processor and 8GB of RAM takes around 1 hour to process the given 20,000 comments. Using a variety of projects with a lot more comment data would produce a better-unbiased results set.
+
+\subsection{Limitations}
+
+One of the main limitations of the project is that it can only capture comments in Java source files. Additionally, the Java source file name should end with the \textit{.java} file extension. The program will omit all other files in the resources directory. This limitation dramatically restricts the application only to Java development teams. Even though not tested, some other Java-like languages such as Scala and Kotlin which also use the same commenting syntax should work with the program. However, this would still need a minor modification to allow the Scala and Kotlin files to be scanned by whitelisting the respective file extensions. 
+
+Another limitation of this project is that the scanned corpus is limited to the amount of installed RAM in the running computer. Currently, all scanned data is processed while accessing it from the main memory. Even though this decision significantly reduces the execution time, it also limits the number of comments that the computer can handle. Due to this constraint, the program requires a significant amount of RAM to process extensive datasets. 
+
+The program attempts to remove one to two-word comments which do not provide a context value. Also, licence text which usually appears at the beginning of the source file is also omitted. However, some developers tend to comment unused code which can affect the clustering process if done excessively. If the unused piece of code is commented using single-line comments, those will be interpreted as several single-line comments. For example, if Eclipse and JetBrains IDE is used to comment out unused code, the IDE comments each line as a single-line comment. This can affect the classification if this unused commented out code is lengthy since it will produce one comment per each line. Also, some developers may use single-line commenting syntax to write multi-line comments. In this scenario, unfortunately, the program will pick up each line as a separate comment thereby affecting the clustering process. 
+
+The program can analyse and cluster the comments written in English only. Even though technically it can detect comments written in other languages, the accuracy of the output is undefined and untested. Several places in the program are hard-coded to support English language only. In case if non-English comments are present in the scanned documents, those comments will not be omitted but will be processed as if it were in English. 
 
 \subsection{Future Work}
 
@@ -307,11 +315,11 @@ This project attempts to cluster a given sequence of comment data. As described 
 
 \subsubsection{Performance improvements} 
 
-The program requires a computer with reasonable processing power to process an adequate amount of data. The main focus of this project was to develop a program to collect comments in a source file and to cluster them. There may be places in the software which can be optimised further to perform document clustering with limited resources.  The program utilises around 5-6GB of RAM to handle a document set of approximately 20,000 documents. Currently, all comment data and generated Count and TF-IDF vectors are stored in the primary memory. This data can be cached elsewhere to release temporary memory for other tasks. 
+The program requires a computer with reasonable processing power to process an adequate amount of data. The main focus of this project was to develop a program to collect comments in a source file and to cluster them. The proposed software can be optimised further to perform document clustering with limited resources.  The program utilises around 5-6GB of RAM to handle a document set of approximately 20,000 documents. Currently, all comment data and generated Count and TF-IDF vectors are stored in the primary memory (RAM). This data can be cached elsewhere to release RAM memory for other tasks. In addition, using more memory efficient data structures (like Pandas Series) may also increase the memory efficiency.
 
 \subsubsection{Extending to other languages} 
 
-The proposed source code scanner only works with Java source files with the file extension \textit{.java}. This can be improved furthermore to capture the comments in other languages as well. Adopting the algorithm for Java-like languages which uses the same lexical structure for the comments should be a simple modification to enable the algorithm to process different file extensions. Java Source Scanner class (class responsible for collecting comments from a source file) can be modified for other languages which use a completely different syntax. It is implemented as a Python class, and by utilising OOP concepts, we can extend the same class to provide support for other languages. 
+The proposed source code scanner only works with Java source files with the file extension \textit{.java}. This can be improved furthermore to capture the comments in other languages as well. Adopting the algorithm for Java-like languages which uses the same lexical structure for the comments should be a simple modification to enable the algorithm to process different file extensions. \textit{JavaFileInspector} class (class responsible for collecting comments from a Java source file) can be modified for other languages which use a completely different syntax. It is implemented as a Python class, and by utilising OOP concepts, we can extend the same class to provide support for other languages. 
 
 \bibliographystyle{IEEEtran}
 \bibliography{references}
