@@ -27,7 +27,7 @@
 - The clustered result will be written into ```comments_cluster_dbscan.txt``` file
 - The count and TF-IDF vectorizer results will open in a seperate window
 
-* Python GUI (plot results) were tested on a macOS environment. The ```pythonw``` should be installed depending on the operating system used. Not all operating systems support python GUI. The program would fail with an error if it was unable to draw the GUI component. However, the clustering and the generation of ```comments.txt``` and ```comments_cluster_dbscan.txt``` will successfully complete irrespective of this issue.
+*Python GUI (plot results) were tested on a macOS environment. The ```pythonw``` should be installed depending on the operating system used. Not all operating systems support python GUI. The program would fail with an error if it was unable to draw the GUI component. However, the clustering and the generation of ```comments.txt``` and ```comments_cluster_dbscan.txt``` will successfully complete irrespective of this issue.
 
 
 [//]: # (These are reference links used in the body of this note and get stripped out when the markdown processor does its job. There is no need to format nicely because it shouldn't be seen. Thanks SO - http://stackoverflow.com/questions/4823468/store-comments-in-markdown-syntax)
